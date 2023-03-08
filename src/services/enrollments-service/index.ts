@@ -6,21 +6,21 @@ import { exclude } from "@/utils/prisma-utils";
 import { Address, Enrollment } from "@prisma/client";
 import { CEPAdressAPI, ViaCEPAddress } from "@/protocols";
 
-async function getAddressFromCEP(cep:string): Promise<ViaCEPAddress> {
+async function getAddressFromCEP(cep: string): Promise<ViaCEPAddress> {
   const result = await request.get(`https://viacep.com.br/ws/${cep}/json/`);
 
   if (!result.data) {
     throw notFoundError();
   }
 
-  const addressGetViaAPI: CEPAdressAPI = result.data;
+  const addressGetViaAPI = result.data as CEPAdressAPI;
 
   return (
     {
       logradouro: addressGetViaAPI.logradouro,
       complemento: addressGetViaAPI.complemento,
       bairro: addressGetViaAPI.bairro,
-      cidade: addressGetViaAPI.localidade,  
+      cidade: addressGetViaAPI.localidade,
       uf: addressGetViaAPI.uf,
     }
   )
@@ -55,9 +55,9 @@ async function createOrUpdateEnrollmentWithAddress(params: CreateOrUpdateEnrollm
   const address = getAddressForUpsert(params.address);
 
   //TODO - Verificar se o CEP é válido
-  const cep: string = address.cep;
+  const cep = address.cep as string;
   const result = await request.get(`https://viacep.com.br/ws/${cep}/json/`);
-  const isaddressGetViaAPIValid: CEPAdressAPI = result.data;
+  const isaddressGetViaAPIValid = result.data as CEPAdressAPI;
 
   if (!isaddressGetViaAPIValid || isaddressGetViaAPIValid.erro) {
     throw notFoundError();
